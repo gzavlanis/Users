@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const connection = require('../../database');
 
-// show all users
+// show all users !!!
 router.get('/', (req, res) => {
 	connection.query('SELECT * FROM Users ORDER BY id', (err, result, fields) => {
 		if (err) throw err;

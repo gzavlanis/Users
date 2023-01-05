@@ -1,16 +1,27 @@
 const express = require('express');
-const redis= require('redis');
 const router = express.Router();
+const redis= require('redis');
+
+// create connection to Redis
+client= redis.createClient();
+
+client.on("error", function (err) {
+    console.log("Error: " + err);
+});
+
+client.on("connect", () => {
+	console.log("Connected with Redis successfully.");
+});
 
 // show all users
 router.get('/', (req, res) => {
-	res.json(redis.hgetall('User'));
+	client.hgetall('User:');
 });
 
 // show specific user
 router.get('/:id', (req, res) => {
 	id = parseInt(req.params.id);
-	res.json(redis.hget('User' + `${id}`));
+	res.json(client.hget('User' + `${id}`));
 });
 
 // create a new user
@@ -20,14 +31,15 @@ router.post('/', (req, res) => {
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
-	} else {
-		id++;
-		redis.hmset('User' + `${parseInt(id)}`, {
-			'first_name': `${first_name}`,
-			'last_name': `${last_name}`,
-			'email': `${email}`
-		});
 	}
+
+	id++;
+	client.hmset('User' + `${parseInt(id)}`, {
+		'first_name': `${first_name}`,
+		'last_name': `${last_name}`,
+		'email': `${email}`
+	});
+	
 });
 
 // update a user
@@ -38,7 +50,7 @@ router.put('/:id', (req, res) => {
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
 	} else {
-		redis.hmset('User' + `${id}`, {
+		client.hmset('User' + `${id}`, {
 			'first_name': `${first_name}`,
 			'last_name': `${last_name}`,
 			'email': `${email}`
@@ -49,7 +61,7 @@ router.put('/:id', (req, res) => {
 // delete user
 router.delete('/:id', (req, res) => {
 	id = parseInt(req.params.id);
-	redis.hdel('User' + `${id}`);
+	client.hdel('User' + `${id}`);
 });
 
 module.exports = router;

@@ -1,11 +1,18 @@
 const express = require('express');
 const app = express();
+const redis= require('redis');
+
+
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use('/api/users', require('./routes/api/users'));
-app.set('view engine', 'ejs');
-app.get('/', (req, res) => {
-	res.render('index');
+app.use(express.urlencoded({
+	extended: true
+}));
+
+app.get("/", (req, res) => {
+	res.status(200);
 });
-app.listen(3000, () => console.log('App started!'));
+
+app.listen(3000, () => {
+	console.log("API started.");
+});

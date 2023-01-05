@@ -1,45 +1,33 @@
 const express = require('express');
+const redis= require('redis');
 const router = express.Router();
-const connection = require('../../database');
 
-// show all users !!!
+// show all users
 router.get('/', (req, res) => {
-	connection.query('SELECT * FROM Users ORDER BY id', (err, result, fields) => {
-		if (err) throw err;
-		if (result.length) {
-			res.send(result);
-		} else {
-			res.send('There are no users here yet.');
-		}
-	});
+	res.json(redis.hgetall('User'));
 });
 
 // show specific user
 router.get('/:id', (req, res) => {
 	id = parseInt(req.params.id);
-	connection.query(`SELECT * FROM Users WHERE id= "${id}"`, (err, result, fields) => {
-		if (err) throw err;
-		if (result.length) {
-			res.send(result);
-		} else {
-			res.send('User not found.');
-		}
-	});
+	res.json(redis.hget('User' + `${id}`));
 });
 
 // create a new user
 router.post('/', (req, res) => {
 	const { first_name, last_name, email } = req.body;
+	var id= 0;
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
+	} else {
+		id++;
+		redis.hmset('User' + `${parseInt(id)}`, {
+			'first_name': `${first_name}`,
+			'last_name': `${last_name}`,
+			'email': `${email}`
+		});
 	}
-
-	const sql = `INSERT INTO Users (first_name, last_name, email) VALUES ('${first_name}', '${last_name}', '${email}')`;
-	connection.query(sql, (err, result, field) => {
-		if (err) throw err;
-		res.send('User created.');
-	});
 });
 
 // update a user
@@ -49,23 +37,19 @@ router.put('/:id', (req, res) => {
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
+	} else {
+		redis.hmset('User' + `${id}`, {
+			'first_name': `${first_name}`,
+			'last_name': `${last_name}`,
+			'email': `${email}`
+		});
 	}
-
-	const sql = `UPDATE Users SET first_name= '${first_name}', last_name= '${last_name}', email= '${email}' WHERE id= '${id}'`;
-	connection.query(sql, (err, result, field) => {
-		if (err) throw err;
-		res.send('User Updated.');
-	});
 });
 
 // delete user
 router.delete('/:id', (req, res) => {
 	id = parseInt(req.params.id);
-	const sql = `DELETE FROM Users WHERE id= '${id}'`;
-	connection.query(sql, (err, result, field) => {
-		if (err) throw err;
-		res.send('User deleted successfully.');
-	});
+	redis.hdel('User' + `${id}`);
 });
 
 module.exports = router;

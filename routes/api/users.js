@@ -22,20 +22,16 @@ router.get('/:id', (req, res) => {
 });
 
 // create a new user
-var id;
 router.post('/', (req, res) => {
 	const { first_name, last_name, email } = req.body;
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
 	} else {
-		client.hSet('User' + `${id.toString()}`, 
-			'first_name', `${first_name}`,
-			'last_name', `${last_name}`,
-			'email', `${email}`
-		);
+		client.incr('id', (err, id) => {
+			client.hSet('user:' + id, '')
+		
 		res.send('User created successfully!');
-		id++;
 	}
 });
 

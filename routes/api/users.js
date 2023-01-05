@@ -3,7 +3,7 @@ const router = express.Router();
 const redis= require('redis');
 
 // create connection to Redis
-const client= redis.createClient({ legacyMode: true});
+const client= redis.createClient();
 client.connect().then(async (res) => {
 	console.log('Redis connected');
 }).catch((err) => {
@@ -11,8 +11,10 @@ client.connect().then(async (res) => {
 });
 
 // show all users
-router.get('/', (req, res) => {
-	res.json(client.keys('*'));
+router.get('/', async (req, res) => {
+	let users= await client.keys('*');
+	console.log(users);
+	res.json(users);
 });
 
 // show specific user
@@ -22,7 +24,7 @@ router.get('/:id', (req, res) => {
 });
 
 // create a new user
-router.post('/', (req, res) => {
+/*router.post('/', (req, res) => {
 	const { first_name, last_name, email } = req.body;
 
 	if (!first_name || !last_name || !email) {
@@ -33,7 +35,7 @@ router.post('/', (req, res) => {
 		
 		res.send('User created successfully!');
 	}
-});
+}); */
 
 // update a user
 router.put('/:id', (req, res) => {

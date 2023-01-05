@@ -13,7 +13,6 @@ client.connect().then(async (res) => {
 // show all users
 router.get('/', async (req, res) => {
 	let users= await client.keys('*');
-	console.log(users);
 	res.json(users);
 });
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const redis= require('redis');
+const redis= require('ioredis');
 
 // create connection to Redis
 const client= redis.createClient();
@@ -19,22 +19,25 @@ router.get('/', async (req, res) => {
 // show specific user
 router.get('/:id', (req, res) => {
 	id = parseInt(req.params.id);
-	res.json(client.hmGet('User' + `${id}`, 'first_name', 'last_name', 'email'));
+	res.json(client.hmGet('User', `${id}`, 'first_name', 'last_name', 'email'));
 });
 
 // create a new user
-/*router.post('/', (req, res) => {
+router.post('/', (req, res) => {
 	const { first_name, last_name, email } = req.body;
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
 	} else {
 		client.incr('id', (err, id) => {
-			client.hSet('user:' + id, '')
-		
-		res.send('User created successfully!');
+			client.hSet('User' + id,
+				'first_name', `${first_name}`,
+				'last_name', `${last_name}`,
+				'email', `${email}`
+			);
+		});
 	}
-}); */
+});
 
 // update a user
 router.put('/:id', (req, res) => {

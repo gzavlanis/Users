@@ -1,14 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const redis= require('ioredis');
-
-// create connection to Redis
-const client= redis.createClient();
-client.connect().then(async (res) => {
-	console.log('Redis connected');
-}).catch((err) => {
-	console.log('There was an error: ' + err);
-});
+const client= require()
 
 // show all users
 router.get('/', async (req, res) => {

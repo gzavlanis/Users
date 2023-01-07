@@ -12,45 +12,48 @@ client.connect().then(async (res) => {
 
 // show all users
 router.get('/', async (req, res) => {
-	let users= await client.keys('*');
-	res.json(users);
+	let users= [await client.keys('*')];
+	let data= [];
+	for (var i = 1; i < users.length; i++) {
+		data[i]= client.hgetall('User' + `${i}`)
+	}
+	res.json(data);
 });
 
 // show specific user
 router.get('/:id', async (req, res) => {
 	id = parseInt(req.params.id);
-	let user= await client.hmget('User' + `${id}`, 'first_name', 'last_name', 'email');
+	let user= await client.hgetall('User' + `${id}`);
 	res.json(user);
 });
 
 // create a new user
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
 	const { first_name, last_name, email } = req.body;
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
-	} 
-		
-	user= client.incr('id', (err, id) => {
-		client.hset('User' + id,
-			'first_name', `${first_name}`,
-			'last_name', `${last_name}`,
-			'email', `${email}`
-		);
-	});
-	console.log(user);
-	
+	} else {
+		await client.incr('id', (err, id) => {
+			client.hmset('User' + id,
+				'first_name', `${first_name}`,
+				'last_name', `${last_name}`,
+				'email', `${email}`
+			);
+		});
+		res.send('User created successfully');
+	}
 });
 
 // update a user
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
 	id = parseInt(req.params.id);
 	const { first_name, last_name, email } = req.body;
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
 	} else {
-		client.hSet('User' + `${id}`,
+		await client.hset('User' + `${id}`,
 			'first_name', `${first_name}`,
 			'last_name', `${last_name}`,
 			'email', `${email}`
@@ -60,10 +63,10 @@ router.put('/:id', (req, res) => {
 });
 
 // delete user
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
 	id = parseInt(req.params.id);
-	client.del('User' + `${id}`);
-	res.send('User deleted.');
+	await client.del('User' + `${id}`);
+	es.send('User deleted.');
 });
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const client= require()
+const client= require('../../database');
 
 // show all users
 router.get('/', async (req, res) => {

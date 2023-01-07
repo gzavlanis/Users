@@ -12,10 +12,10 @@ client.connect().then(async (res) => {
 
 // show all users
 router.get('/', async (req, res) => {
-	let users= [await client.keys('*')];
+	let users= await client.keys('*');
 	let data= [];
 	for (var i = 1; i < users.length; i++) {
-		data[i]= client.hgetall('User' + `${i}`)
+		data[i]= await client.hgetall('User' + `${i}`);
 	}
 	res.json(data);
 });

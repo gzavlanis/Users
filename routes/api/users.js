@@ -17,9 +17,10 @@ router.get('/', async (req, res) => {
 });
 
 // show specific user
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
 	id = parseInt(req.params.id);
-	res.json(client.hmGet('User', `${id}`, 'first_name', 'last_name', 'email'));
+	let user= await client.hmget('User' + `${id}`, 'first_name', 'last_name', 'email');
+	res.json(user);
 });
 
 // create a new user
@@ -28,15 +29,17 @@ router.post('/', (req, res) => {
 
 	if (!first_name || !last_name || !email) {
 		return res.status(400).send('You have empty fields! Try again.');
-	} else {
-		client.incr('id', (err, id) => {
-			client.hSet('User' + id,
-				'first_name', `${first_name}`,
-				'last_name', `${last_name}`,
-				'email', `${email}`
-			);
-		});
-	}
+	} 
+		
+	user= client.incr('id', (err, id) => {
+		client.hset('User' + id,
+			'first_name', `${first_name}`,
+			'last_name', `${last_name}`,
+			'email', `${email}`
+		);
+	});
+	console.log(user);
+	
 });
 
 // update a user

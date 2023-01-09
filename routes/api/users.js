@@ -4,10 +4,12 @@ const client= require('../../database');
 
 // show all users
 router.get('/', async (req, res) => {
-	let users= await client.keys('*');
+	let users= await client.keys('User*');
 	let data= [];
-	for (var i = 1; i < users.length; i++) {
-		data[i]= await client.hgetall('User' + `${i}`);
+	for (let i = 0; i < users.length; i++) {
+		let userData= await client.hgetall(users[i]);
+		userData.id= parseInt(users[i].replace('User', ''));
+		data.push(userData);
 	}
 	res.json(data);
 });
@@ -15,7 +17,7 @@ router.get('/', async (req, res) => {
 // show specific user
 router.get('/:id', async (req, res) => {
 	id = parseInt(req.params.id);
-	let user= await client.hgetall('User' + `${id}`);
+	let user= await client.hgetall(`User${id}`);
 	res.json(user);
 });
 
@@ -58,7 +60,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
 	id = parseInt(req.params.id);
 	await client.del('User' + `${id}`);
-	es.send('User deleted.');
+	res.send('User deleted.');
 });
 
 module.exports = router;
